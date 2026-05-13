@@ -1,0 +1,21 @@
+# Binaries and large files
+*.7z
+*.iso
+*.img
+*.vdi
+*.vmdk
+*.ova
+*.log
+
+# Kali Linux VM
+kali-linux-*/
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
