@@ -5,6 +5,7 @@ Ce dépôt retrace le développement d'un système d'exploitation moderne écrit
 ## 📂 Structure du Projet
 
 - **[Day 1](./Day1)** : Mise en place de l'environnement Bare-Metal, installation de Rust Nightly et analyse des vecteurs d'attaque sur la chaîne de compilation.
+- **[Day 2](./Day2)** : Création d'un binaire `no_std`, configuration du linker pour le bare-metal et analyse de la réduction de la surface d'attaque.
 - *Prochainement : Noyau minimal, gestion de la mémoire, drivers...*
 
 ## 🎯 Objectifs
