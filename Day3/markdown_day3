@@ -1,0 +1,376 @@
+# Jour 3 — Panic Handler & Bootloader
+
+---
+
+## Partie 1 — Bootloader (Boot Sector ASM)
+
+### Objectif
+
+Créer un boot sector en assembleur x86 qui est reconnu par le BIOS et chargé par QEMU comme une vraie image disque.
+
+### Concept
+
+Quand un PC démarre, le BIOS cherche un secteur de 512 octets sur le disque qui se termine par la signature `0xAA55`. C'est le **boot sector**. Il est chargé à l'adresse `0x7C00` en mémoire et exécuté directement par le CPU.
+
+### Fichier `src/boot.asm`
+
+```nasm
+BITS 16
+ORG 0x7C00
+
+start:
+    cli
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0x7C00
+
+    ; Afficher message de boot
+    mov si, msg_boot
+    call print16
+
+    ; Charger le kernel depuis le disque
+    ; On lit 32 secteurs depuis le secteur 2
+    ; et on les place à l'adresse 0x8000
+    mov ax, 0x0800       ; segment 0x0800 = adresse 0x8000
+    mov es, ax
+    xor bx, bx           ; offset 0
+
+    mov ah, 0x02         ; fonction BIOS : lire secteurs
+    mov al, 32           ; nombre de secteurs à lire
+    mov ch, 0            ; cylindre 0
+    mov cl, 2            ; secteur 2 (le kernel commence ici)
+    mov dh, 0            ; tête 0
+    int 0x13             ; appel BIOS disque
+
+    ; Vérifier si la lecture a réussi
+    jc disk_error
+
+    mov si, msg_ok
+    call print16
+
+    ; Passer en mode protégé 32 bits
+    lgdt [gdt_descriptor]
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+    jmp 0x08:protected_mode
+
+disk_error:
+    mov si, msg_err
+    call print16
+    hlt
+
+print16:
+    lodsb
+    or al, al
+    jz print16_done
+    mov ah, 0x0E
+    int 0x10
+    jmp print16
+print16_done:
+    ret
+
+msg_boot db 'Booting kernel...', 0x0D, 0x0A, 0
+msg_ok   db 'Kernel loaded!', 0x0D, 0x0A, 0
+msg_err  db 'Disk error!', 0x0D, 0x0A, 0
+
+gdt_start:
+    dq 0                     ; descripteur nul obligatoire
+    dq 0x00CF9A000000FFFF    ; segment code 32 bits
+    dq 0x00CF92000000FFFF    ; segment data 32 bits
+gdt_end:
+
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1
+    dd gdt_start
+
+BITS 32
+protected_mode:
+    ; Initialiser les segments en mode protégé
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov esp, 0x90000
+
+    ; Sauter vers le kernel à 0x8000
+    call 0x8000
+
+    ; Si le kernel retourne (ne devrait pas)
+    hlt
+
+times 510-($-$$) db 0
+dw 0xAA55
+```
+
+### Explication ligne par ligne des parties clés
+
+| Instruction | Rôle |
+|---|---|
+| `BITS 16` | Le CPU démarre toujours en mode 16 bits |
+| `ORG 0x7C00` | Le BIOS charge le boot sector à cette adresse |
+| `cli` | Désactive les interruptions pendant l'init |
+| `int 0x13` | Appel BIOS pour lire des secteurs sur le disque |
+| `lgdt` | Charge la table de descripteurs (GDT) pour le mode 32 bits |
+| `cr0 or 1` | Active le mode protégé 32 bits |
+| `jmp 0x08:protected_mode` | Saut long vers le mode 32 bits |
+| `call 0x8000` | Saute vers le kernel chargé en mémoire |
+| `0xAA55` | Signature obligatoire reconnue par le BIOS |
+
+### Commandes — Compilation du boot sector
+
+```bash
+nasm -f bin src/boot.asm -o boot.bin
+```
+
+---
+
+## Partie 2 — Panic Handler (Kernel Rust)
+
+### Objectif
+
+Implémenter un gestionnaire de panic complet qui capture les erreurs fatales, les affiche sur le port série, et stoppe proprement le CPU.
+
+### Pourquoi c'est critique en sécurité
+
+```
+Sans panic handler :
+panic → CPU continue d'exécuter → mémoire aléatoire → exploitable
+
+Avec panic handler :
+panic → on prend le contrôle → on affiche l'erreur → CPU halt propre
+→ zéro comportement indéfini
+→ zéro surface d'exploitation
+```
+
+### Structure du projet
+
+```
+OS_Day3/
+├── Cargo.toml
+├── linker.ld
+├── os.img
+├── boot.bin
+├── kernel.bin
+├── .cargo/
+│   └── config.toml
+└── src/
+    ├── main.rs
+    └── boot.asm
+```
+
+### Fichier `Cargo.toml`
+
+```toml
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2024"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+```
+
+### Fichier `.cargo/config.toml`
+
+```toml
+[build]
+target = "x86_64-unknown-none"
+
+[target.x86_64-unknown-none]
+rustflags = ["-C", "link-arg=-Tlinker.ld"]
+```
+
+### Fichier `linker.ld`
+
+```ld
+ENTRY(_start)
+SECTIONS {
+    . = 0x8000;
+    .text : { *(.text) }
+    .rodata : { *(.rodata) }
+    .data : { *(.data) }
+    .bss : { *(.bss) }
+}
+```
+
+> `0x8000` est l'adresse où le boot sector copie le kernel en mémoire. Le linker script dit à Rust de compiler le kernel pour cette adresse.
+
+### Fichier `src/main.rs`
+
+```rust
+#![no_std]
+#![no_main]
+
+use core::panic::PanicInfo;
+
+// Port série COM1 — adresse hardware fixe sur x86
+const COM1: u16 = 0x3F8;
+
+// Envoie un octet sur le port série via l'instruction x86 "out"
+unsafe fn write_serial(byte: u8) {
+    unsafe {
+        core::arch::asm!(
+            "out dx, al",
+            in("dx") COM1,
+            in("al") byte,
+        );
+    }
+}
+
+// Envoie une chaîne de caractères octet par octet
+unsafe fn print_serial(s: &str) {
+    for byte in s.bytes() {
+        unsafe { write_serial(byte); }
+    }
+}
+
+// Stoppe le CPU proprement avec l'instruction "hlt"
+// La boucle redémarre hlt si une interruption arrive
+unsafe fn halt() -> ! {
+    loop {
+        unsafe { core::arch::asm!("hlt"); }
+    }
+}
+
+// Point d'entrée du kernel
+// #[unsafe(no_mangle)] : garde le nom "_start" pour le linker
+// extern "C" : convention d'appel C
+// -> ! : ne retourne jamais (un OS ne termine pas)
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    unsafe {
+        print_serial("OS starting...\n");
+
+        // Panic volontaire pour tester le handler
+        panic!("Test panic : quelque chose a mal tourne !");
+    }
+}
+
+// Gestionnaire de panic obligatoire en no_std
+// PanicInfo contient : message d'erreur + fichier + numéro de ligne
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    unsafe {
+        print_serial("\n=== KERNEL PANIC ===\n");
+
+        // Afficher le message du panic
+        if let Some(msg) = info.message().as_str() {
+            print_serial("Raison  : ");
+            print_serial(msg);
+            print_serial("\n");
+        }
+
+        // Afficher le fichier source où le panic s'est produit
+        if let Some(location) = info.location() {
+            print_serial("Fichier : ");
+            print_serial(location.file());
+            print_serial("\n");
+        }
+
+        print_serial("Systeme arrete.\n");
+        print_serial("====================\n");
+
+        // Stopper le CPU — jamais laisser le système dans un état instable
+        halt();
+    }
+}
+```
+
+### Commandes — Compilation du kernel
+
+```bash
+# Compiler le kernel Rust en bare-metal
+cargo build -Z build-std=core --target x86_64-unknown-none
+
+# Convertir l'ELF en binaire plat
+objcopy -O binary \
+  target/x86_64-unknown-none/debug/kernel \
+  kernel.bin
+```
+
+---
+
+## Partie 3 — Liaison Boot Sector + Kernel & Run
+
+### Comment la liaison fonctionne
+
+```
+os.img (image disque)
+├── secteur 1 (512 octets) → boot.bin  (boot sector ASM)
+└── secteurs 2+ → kernel.bin           (kernel Rust)
+
+Au démarrage :
+BIOS charge boot.bin à 0x7C00
+    ↓
+boot.bin lit kernel.bin depuis le disque et le place à 0x8000
+    ↓
+boot.bin saute vers 0x8000
+    ↓
+_start() du kernel Rust s'exécute
+    ↓
+panic!() déclenche le panic handler
+    ↓
+message affiché sur port série + CPU halt
+```
+
+### Commandes — Création de l'image disque
+
+```bash
+# Créer une image disque vide de 1MB
+dd if=/dev/zero of=os.img bs=512 count=2048
+
+# Copier le boot sector au début (secteur 1)
+dd if=boot.bin of=os.img conv=notrunc
+
+# Copier le kernel à partir du secteur 2
+dd if=kernel.bin of=os.img bs=512 seek=1 conv=notrunc
+```
+
+### Commande — Lancement QEMU
+
+```bash
+qemu-system-x86_64 \
+  -drive format=raw,file=os.img \
+  -serial stdio \
+  -no-reboot \
+  -no-shutdown
+```
+
+### Résultat attendu
+
+Dans la fenêtre QEMU :
+
+```
+Booting kernel...
+Kernel loaded!
+```
+
+Dans le terminal (port série) :
+
+```
+OS starting...
+
+=== KERNEL PANIC ===
+Raison  : Test panic : quelque chose a mal tourne !
+Fichier : src/main.rs
+Systeme arrete.
+====================
+```
+
+---
+
+## Résumé — Angle Cyber
+
+| Concept | Implication sécurité |
+|---|---|
+| Boot sector signé `0xAA55` | Vecteur d'attaque : bootkit, MBR rootkit |
+| Passage mode 16 → 32 bits | Surface d'attaque pendant la transition |
+| Panic non géré | CPU divague → comportement indéfini → exploitable |
+| `halt()` après panic | Stoppe toute exécution → zéro exploitation possible |
+| Port série pour debug | Canal de communication hors-bande utilisé en forensics |
