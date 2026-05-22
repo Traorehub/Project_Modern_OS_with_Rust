@@ -1,0 +1,21 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2024"
+authors = ["Your Name <you@example.com>"]
+publish = false
+
+[dependencies]
+
+[profile.dev]
+panic = "abort"
+opt-level = 0
+debug = true
+overflow-checks = false
+lto = false
+
+[profile.release]
+panic = "abort"
+opt-level = "z"
+lto = true
+debug = false
