@@ -1,4 +1,4 @@
-//! Mutex Spinlock — Jour 5 (vga1)
+//! Mutex Spinlock - Jour 5 (vga1)
 #![allow(dead_code)]
 
 use core::sync::atomic::{AtomicBool, Ordering};

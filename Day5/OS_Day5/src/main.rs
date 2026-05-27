@@ -1,4 +1,4 @@
-//! Jour 5 — Safe Wrapper VGA + println!
+//! Jour 5 - Safe Wrapper VGA + println!
 #![no_std]
 #![no_main]
 #![allow(unsafe_op_in_unsafe_fn)]
@@ -33,7 +33,7 @@ pub extern "C" fn _start() -> ! {
     vga2::WRITER.lock().clear();
     unsafe { print_serial("WRITER.lock().clear() done\n"); }
 
-    // Démonstration de println! — plus d'unsafe visible !
+    // Démonstration de println! - plus d'unsafe visible !
     println!("Jour 5 - Safe VGA Wrapper");
     println!("==========================");
     println!();

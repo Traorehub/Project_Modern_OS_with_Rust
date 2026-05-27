@@ -1,4 +1,4 @@
-# Jour 5 — VGA Buffer II : Safe Wrapper & macro println!
+# Jour 5 - VGA Buffer II : Safe Wrapper & macro println!
 
 ---
 
@@ -9,11 +9,11 @@ Au Jour 4, nous avons accédé directement à la mémoire vidéo `0xb8000` via d
 - Chaque appel à `write_char` ou `write_str` nécessitait un bloc `unsafe`
 - Aucune gestion de position courante (curseur)
 - Aucune protection contre les accès concurrents
-- Pas de macro `println!` — il fallait appeler les fonctions manuellement
+- Pas de macro `println!` - il fallait appeler les fonctions manuellement
 
 Au Jour 5, nous **encapsulons tout cela** dans une interface sécurisée :
 - Un `Writer` struct qui gère le curseur et l'état de l'écran
-- Une interface `safe` — le code appelant n'a plus besoin d'`unsafe`
+- Une interface `safe` - le code appelant n'a plus besoin d'`unsafe`
 - Un `Mutex` global pour protéger contre les accès concurrents
 - Une macro `println!` utilisable comme en Rust standard
 
@@ -21,11 +21,11 @@ Au Jour 5, nous **encapsulons tout cela** dans une interface sécurisée :
 
 ## Étape importante sautée ?
 
-Honnêtement, **une étape a été implicitement sautée** : le passage complet en **mode 64 bits (Long Mode)**. Notre kernel tourne encore en 32 bits (`i686`) alors que nous compilons pour du bare-metal x86. Ce n'est pas bloquant pour les exercices actuels, mais à noter pour plus tard lors de l'étude des exceptions CPU au Jour 7 — l'IDT 64 bits sera différente. Pour l'instant c'est acceptable, nous continuons.
+Honnêtement, **une étape a été implicitement sautée** : le passage complet en **mode 64 bits (Long Mode)**. Notre kernel tourne encore en 32 bits (`i686`) alors que nous compilons pour du bare-metal x86. Ce n'est pas bloquant pour les exercices actuels, mais à noter pour plus tard lors de l'étude des exceptions CPU au Jour 7 - l'IDT 64 bits sera différente. Pour l'instant c'est acceptable, nous continuons.
 
 ---
 
-## Concept — C'est quoi un Safe Wrapper ?
+## Concept - C'est quoi un Safe Wrapper ?
 
 Au Jour 4 :
 ```rust
@@ -38,7 +38,7 @@ unsafe {
 
 Au Jour 5 :
 ```rust
-// Plus d'unsafe visible — l'interface est sûre
+// Plus d'unsafe visible - l'interface est sûre
 println!("Hello from my OS!");
 println!("Ligne 2 en couleur");
 ```
@@ -47,7 +47,7 @@ Le `unsafe` existe toujours en dessous, mais il est **isolé dans le module VGA*
 
 ---
 
-## Concept — Accès concurrents et pourquoi c'est dangereux
+## Concept - Accès concurrents et pourquoi c'est dangereux
 
 Dans un OS, plusieurs parties du code peuvent vouloir écrire à l'écran en même temps (interruptions, kernel, drivers). Sans protection :
 
@@ -87,14 +87,14 @@ OS_Day5/
 
 ---
 
-## Résumé — Angle Cyber
+## Résumé - Angle Cyber
 
 | Concept | Jour 4 (dangereux) | Jour 5 (sécurisé) |
 |---|---|---|
 | Accès VGA | `unsafe` partout dans main.rs | `unsafe` isolé dans `write_cell` uniquement |
-| Accès concurrent | Aucune protection | `Mutex` spinlock — un seul accès à la fois |
+| Accès concurrent | Aucune protection | `Mutex` spinlock - un seul accès à la fois |
 | Formatage | Manuel octet par octet | `fmt::Write` + `println!` avec formatage complet |
-| Scroll | Absent — débordement silencieux | Scroll automatique géré par `Writer` |
+| Scroll | Absent - débordement silencieux | Scroll automatique géré par `Writer` |
 | Caractères invalides | Écrits tels quels | Remplacés par `■` (0xfe) |
 | Bounds check | Dans chaque fonction | Centralisé dans `write_cell` uniquement |
 

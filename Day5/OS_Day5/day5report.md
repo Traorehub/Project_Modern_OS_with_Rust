@@ -1,8 +1,8 @@
-# Rapport Complet -Jour 5 : VGA Buffer II (Safe Wrapper & macro println!)
+# Rapport Jour 5 : VGA Buffer II (Safe Wrapper & macro println!)
 
 ## Introduction
 
-Dans la continuité du Jour 4, où nous avions établi l'accès de bas niveau (et non sécurisé) à la mémoire vidéo (`0xb8000`), l'objectif du Jour 5 était d'apporter de la robustesse, de la sécurité et un confort de développement en créant une interface haut niveau. Nous avons implémenté un système complet de gestion du texte à l'écran (avec défilement automatique) et introduit l'utilisation de macros standards comme `println!`.
+Dans la continuité du Jour 4, où nous avions établi l'accès de bas niveau à la mémoire vidéo (`0xb8000`), l'objectif du Jour 5 était d'apporter de la robustesse, de la sécurité et un confort de développement en créant une interface haut niveau. Nous avons implémenté un système complet de gestion du texte à l'écran (avec défilement automatique) comme le scroll lorsqu'on definle son repertoire whatsapp ou autre  et introduit l'utilisation de macros standards comme `println!`.
 
 ## Travaux Réalisés
 
@@ -12,7 +12,7 @@ Dans la continuité du Jour 4, où nous avions établi l'accès de bas niveau (e
     * **Gestion du défilement (Scroll) :** Implémentation d'une fonction déplaçant toutes les lignes vers le haut et effaçant la dernière ligne lorsque le bas de l'écran est atteint.
     * **Sécurisation (Safe Wrapper) :** Isoler l'usage du mot-clé `unsafe` dans une unique fonction interne (`write_cell`), qui vérifie par ailleurs les limites de l'écran.
 
-2. **Gestion de la concurrence (Spinlock "Maison" 100% hors-ligne) :**
+2. **Gestion de la concurrence (Spinlock) :**
     * Pour garder le projet strictement indépendant d'internet (et éviter les problèmes réseau liés aux VMs), la dépendance externe `spin` a été retirée de `Cargo.toml`.
     * **Implémentation `vga1.rs` :** Création d'un Spinlock personnalisé ultra-léger basé sur `core::sync::atomic::AtomicBool` (utilisation de `swap` et `spin_loop`).
     * Déclaration d'un `Mutex` global statique (`vga2::WRITER`) protégeant le buffer vidéo contre les écritures concurrentes ("data races").
@@ -30,9 +30,8 @@ Dans la continuité du Jour 4, où nous avions établi l'accès de bas niveau (e
     * Tests de formatage de variables entières (`x + y = 1379`).
     * Test en boucle pour démontrer le défilement automatique fonctionnel.
 
-## Implication en Cybersécurité (Sécurité Système)
+## Implication en Cybersécurité 
 
-La conception mise en œuvre aujourd'hui est le reflet d'une architecture de système sécurisé :
 
 * **Principe de moindre privilège & Isolation :** Le code noyau qui veut afficher du texte n'a plus besoin d'accéder au pointeur matériel brut. Il passe par une API sécurisée.
 * **Protection contre la concurrence :** Les spinlocks protègent l'état partagé (l'écran). C'est crucial pour la stabilité future lors de la réception d'interruptions asynchrones.

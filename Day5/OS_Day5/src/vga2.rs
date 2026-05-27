@@ -1,4 +1,4 @@
-//! VGA text-mode driver — Jour 5 (vga2)
+//! VGA text-mode driver - Jour 5 (vga2)
 //! Safe Wrapper + support fmt::Write
 #![allow(dead_code)]
 
@@ -126,7 +126,7 @@ impl Writer {
     /// Écrit directement une cellule VGA (caractère + couleur)
     /// C'est le SEUL endroit où on touche au pointeur brut
     fn write_cell(&self, row: usize, col: usize, ascii: u8, color: u8) {
-        // Bounds check — protection contre la corruption mémoire
+        // Bounds check - protection contre la corruption mémoire
         if row >= VGA_HEIGHT || col >= VGA_WIDTH {
             return;
         }
@@ -158,17 +158,17 @@ pub static WRITER: Mutex<Writer> = Mutex::new(Writer::new());
 
 // ─── Macros publiques ────────────────────────────────────────────────────────
 
-/// Macro print! pour le VGA — fonctionne comme en Rust standard
+/// Macro print! pour le VGA - fonctionne comme en Rust standard
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ({
         use core::fmt::Write;
-        // lock() prend le Mutex — bloque si quelqu'un d'autre écrit
+        // lock() prend le Mutex - bloque si quelqu'un d'autre écrit
         $crate::vga2::WRITER.lock().write_fmt(format_args!($($arg)*)).unwrap();
     });
 }
 
-/// Macro println! pour le VGA — ajoute un retour à la ligne
+/// Macro println! pour le VGA - ajoute un retour à la ligne
 #[macro_export]
 macro_rules! println {
     ()            => ($crate::print!("\n"));

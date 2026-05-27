@@ -1,4 +1,4 @@
-# Résumé du Rapport — Jour 5 : VGA Buffer II
+# Résumé du Rapport - Jour 5 : VGA Buffer II
 
 **Objectif atteint :** Sécurisation de l'affichage VGA et création d'une interface de développement standard (`println!`).
 

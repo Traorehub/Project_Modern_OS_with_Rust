@@ -1,10 +1,10 @@
-# Jour 4 — VGA Buffer I : Accès direct à la mémoire vidéo
+# Jour 4 - VGA Buffer I : Accès direct à la mémoire vidéo
 
 ---
 
-## Concept — C'est quoi le VGA Buffer ?
+## Concept - C'est quoi le VGA Buffer ?
 
-En mode texte VGA, l'écran est mappé directement en mémoire à l'adresse fixe **`0xb8000`**. Tout octet écrit à cette adresse s'affiche immédiatement à l'écran — sans pilote, sans OS, sans appel système.
+En mode texte VGA, l'écran est mappé directement en mémoire à l'adresse fixe **`0xb8000`**. Tout octet écrit à cette adresse s'affiche immédiatement à l'écran - sans pilote, sans OS, sans appel système.
 
 ```
 RAM
@@ -43,7 +43,7 @@ Exemple : caractère à la ligne 1, colonne 0 → `0xb8000 + 160`
 
 ---
 
-## Angle Cyber — Risques de corruption mémoire
+## Angle Cyber - Risques de corruption mémoire
 
 En bare-metal, **personne ne t'arrête** si tu écris au mauvais endroit.
 
@@ -267,7 +267,7 @@ pub const fn make_color(fg: Color, bg: Color) -> u8 {
     (bg as u8) << 4 | (fg as u8)
 }
 
-/// Écrit un caractère en (row, col) — ignoré si hors bornes (anti-corruption)
+/// Écrit un caractère en (row, col) - ignoré si hors bornes (anti-corruption)
 pub unsafe fn write_char(row: usize, col: usize, ascii: u8, color: u8) {
     if row >= VGA_HEIGHT || col >= VGA_WIDTH { return; }
     let offset = (row * VGA_WIDTH + col) * 2;
@@ -325,7 +325,7 @@ unsafe fn halt() -> ! {
     loop { core::arch::asm!("hlt"); }
 }
 
-/// Point d'entrée du kernel — placé à 0x8000 par le linker script
+/// Point d'entrée du kernel - placé à 0x8000 par le linker script
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".text.entry")]
 pub extern "C" fn _start() -> ! {
@@ -394,7 +394,7 @@ dd if=/dev/zero of=os.img bs=512 count=2048
 dd if=boot.bin   of=os.img conv=notrunc               # secteur 0
 dd if=kernel.bin of=os.img bs=512 seek=1 conv=notrunc # secteur 1+
 
-# 5. Lancer QEMU — sortie série dans le terminal
+# 5. Lancer QEMU - sortie série dans le terminal
 qemu-system-x86_64 -drive format=raw,file=os.img \
   -serial stdio -no-reboot -no-shutdown -display none
 ```
@@ -424,7 +424,7 @@ VGA Buffer test done.
 
 L'option `-serial stdio` redirige le **port série COM1** (`0x3F8`) vers le terminal courant. Toutes les chaînes envoyées par `print_serial` y apparaissent directement.
 
-L'option `-display none` désactive la fenêtre graphique QEMU — c'est intentionnel pour un environnement de développement sans interface graphique.
+L'option `-display none` désactive la fenêtre graphique QEMU - c'est intentionnel pour un environnement de développement sans interface graphique.
 
 **Pour afficher les messages dans la fenêtre QEMU graphique**, supprimez `-display none` :
 

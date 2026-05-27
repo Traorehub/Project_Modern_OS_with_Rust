@@ -1,0 +1,15 @@
+[build]
+target = "i686-unknown-none.json"
+
+[target.i686-unknown-none]
+rustflags = [
+    "-C", "link-arg=-T/home/kali/Day6/OS_Day6/linker.ld",
+    "-C", "linker=rust-lld",
+    "-C", "opt-level=z",
+    "-C", "strip=debuginfo",
+    "-C", "panic=abort",
+    "-C", "code-model=kernel",
+    "-C", "relocation-model=static",
+    "-C", "target-cpu=i686",
+]
+runner = "/home/kali/Day6/OS_Day6/run_tests.sh"
