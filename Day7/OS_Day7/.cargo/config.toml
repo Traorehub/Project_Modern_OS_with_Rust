@@ -1,0 +1,13 @@
+[build]
+target = "x86_64-unknown-none"
+
+[target.x86_64-unknown-none]
+rustflags = [
+    "-C", "link-arg=-T/home/kali/Day7/OS_Day7/linker.ld",
+    "-C", "linker=rust-lld",
+    "-C", "opt-level=z",
+    "-C", "panic=abort",
+    "-C", "code-model=kernel",
+    "-C", "relocation-model=static",
+]
+runner = "/home/kali/Day7/OS_Day7/run_tests.sh"

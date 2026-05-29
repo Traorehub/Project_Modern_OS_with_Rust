@@ -1,10 +1,12 @@
-# Jour 7 — Exceptions CPU & IDT
+# Jour 7 - Exceptions CPU & IDT
+
+![](./../Day2/day2_concept.png)
 
 ---
 
 ## Transition depuis le Jour 6.5
 
-Au Jour 6.5, on a switché vers le **Long Mode 64 bits**. Le kernel tourne désormais en x86_64 avec un paging fonctionnel. Mais il manque encore quelque chose de fondamental : quand le CPU rencontre une erreur (division par zéro, accès mémoire invalide, instruction illégale), **personne ne l'attrape**. Sans IDT configurée, n'importe quelle exception cause un Triple Fault — le CPU reboot instantanément.
+Au Jour 6.5, on a switché vers le **Long Mode 64 bits**. Le kernel tourne désormais en x86_64 avec un paging fonctionnel. Mais il manque encore quelque chose de fondamental : quand le CPU rencontre une erreur (division par zéro, accès mémoire invalide, instruction illégale), **personne ne l'attrape**. Sans IDT configurée, n'importe quelle exception cause un Triple Fault - le CPU reboot instantanément.
 
 Au Jour 7, on implémente l'**IDT (Interrupt Descriptor Table)** : la table qui dit au CPU quoi faire pour chaque type d'exception.
 
@@ -30,7 +32,7 @@ CPU saute vers le handler
 Handler traite l'erreur → panic, log, ou récupération
 ```
 
-Sans IDT chargée → **Triple Fault** → CPU reboot → boucle infinie.
+Sans IDT chargée - **Triple Fault** - CPU reboot - boucle infinie.
 
 ---
 
@@ -49,16 +51,21 @@ Sans IDT chargée → **Triple Fault** → CPU reboot → boucle infinie.
 ## Angle Cyber — Pourquoi ces exceptions sont critiques
 
 ### Division par zéro (0)
+
 Simple à déclencher, permet de tester que l'IDT fonctionne. En exploitation, peut être utilisée pour DoS si non gérée.
 
 ### Invalid Opcode (6)
+
 Utilisé en **anti-debug** — certains malwares insèrent des instructions invalides (`UD2`) pour détecter si un debugger intercepte l'exception avant eux.
 
 ### Double Fault (8)
+
 Se produit quand une exception arrive **pendant le traitement d'une autre exception**. Souvent signe d'une **corruption de stack** — très exploitable car le CPU utilise la même stack corrompue pour handler le double fault. En pratique, un double fault non géré → Triple Fault → reboot.
 
 ### General Protection Fault (13)
+
 C'est **l'exception de sécurité principale**. Déclenchée par :
+
 - Accès à de la mémoire non autorisée
 - Exécution de code en Ring 0 depuis Ring 3
 - Utilisation de segments invalides
@@ -66,6 +73,7 @@ C'est **l'exception de sécurité principale**. Déclenchée par :
 La majorité des exploits de type **privilege escalation** tentent de déclencher un GPF contrôlé pour rediriger l'exécution.
 
 ### Page Fault (14)
+
 Déclenchée quand le CPU accède à une adresse virtuelle non mappée ou sans permission. Le registre **CR2** contient l'adresse qui a causé le fault — information clé pour le debugging et la forensics.
 
 ```
@@ -123,25 +131,7 @@ C'est une contrainte de sécurité importante — Rust 2024 rend explicite le da
 
 ## Structure du projet
 
-```
-OS_Day7/
-├── Cargo.toml          ← dépendance x86_64 avec feature abi_x86_interrupt
-├── src/
-│   ├── main.rs         ← initialise l'IDT, déclenche les tests
-│   ├── idt.rs          ← nouveau : IDT + handlers
-│   ├── vga1.rs
-│   ├── vga2.rs
-│   ├── vga.rs
-│   ├── serial.rs
-│   ├── test_runner.rs
-│   ├── boot.asm
-│   └── stage2.asm
-└── tests/
-    └── src/
-        └── main.rs
-```
-
----
+![Structure des fichiers et dossiers du projet](./file_structure.png)
 
 ## Fichiers
 
@@ -419,21 +409,9 @@ qemu-system-x86_64 \
 
 ## Résultat obtenu
 
-```
-Jour 7 - IDT & Exceptions CPU
-==============================
-IDT chargee.
+![Compilation réussie](./compile_success.png)
 
-Test 1 : declenchement division par zero...
-
-[EXCEPTION] Division par zero !
-  RIP : 0x200050
-
-=== KERNEL PANIC ===
-Raison  : divide error
-Fichier : src/idt.rs
-Systeme arrete.
-```
+![Résultat final - Exceptions CPU interceptées](./final_result.png)
 
 ### Interprétation
 

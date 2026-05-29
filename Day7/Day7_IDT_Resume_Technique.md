@@ -1,10 +1,10 @@
-# Jour 7 — Exceptions CPU & IDT (Résumé Technique)
+# Jour 7 - Exceptions CPU & IDT
 
 ---
 
 ## Introduction
 
-Au Jour 6.5, le kernel tourne en Long Mode 64 bits avec paging fonctionnel. Mais sans IDT configurée, toute erreur CPU cause un **Triple Fault** — le système reboot instantanément sans laisser de trace. Le Jour 7 implémente l'IDT pour intercepter et analyser ces erreurs proprement.
+Au Jour 6.5, le kernel tourne en Long Mode 64 bits avec paging fonctionnel. Mais sans IDT configurée, toute erreur CPU cause un **Triple Fault** , le système reboot instantanément sans laisser de trace. Le Jour 7 implémente l'IDT pour intercepter et analyser ces erreurs proprement.
 
 ---
 
@@ -44,7 +44,7 @@ Sans IDT → Triple Fault → reboot. Avec IDT → contrôle total.
 
 ## La crate `x86_64`
 
-Fournit des abstractions typées sur le CPU — évite de manipuler des bits bruts :
+Fournit des abstractions typées sur le CPU - évite de manipuler des bits bruts :
 
 ```rust
 // Sans x86_64 : structs manuelles, 200+ lignes, erreurs faciles
@@ -55,18 +55,20 @@ idt.load(); // → instruction LIDT
 ```
 
 Feature obligatoire dans `Cargo.toml` :
+
 ```toml
 x86_64 = { version = "0.15", default-features = false, features = ["instructions", "abi_x86_interrupt"] }
 ```
 
 Et dans `main.rs` (racine de crate uniquement) :
+
 ```rust
 #![feature(abi_x86_interrupt)]
 ```
 
 ---
 
-## Portion de code cruciale — `src/idt.rs`
+## Portion de code cruciale - `src/idt.rs`
 
 ### Initialisation
 
@@ -87,7 +89,7 @@ pub fn init() {
 }
 ```
 
-### Handler type — Division par zéro
+### Handler  Division par zéro
 
 ```rust
 // ABI spéciale : le CPU sauvegarde automatiquement les registres
@@ -99,7 +101,7 @@ extern "x86-interrupt" fn divide_error_handler(frame: InterruptStackFrame) {
 }
 ```
 
-### Handler Page Fault — le plus informatif
+### Handler Page Fault , le plus informatif
 
 ```rust
 extern "x86-interrupt" fn page_fault_handler(
@@ -127,60 +129,15 @@ extern "x86-interrupt" fn page_fault_handler(
 
 ## Arborescence du projet
 
-```
-OS_Day7/
-├── Cargo.toml              ← dépendance x86_64 v0.15
-├── Cargo.lock
-├── linker.ld               ← ELF64, _start à 0x200000
-├── boot.bin                ← boot sector 16 bits compilé
-├── stage2.bin              ← transition 32→64 bits compilé
-├── kernel.bin              ← kernel Rust compilé (binaire plat)
-├── os.img                  ← image disque finale
-├── run_tests.sh            ← runner QEMU pour les tests
-├── .cargo/
-│   └── config.toml         ← target x86_64-unknown-none + runner
-├── src/
-│   ├── main.rs             ← point d'entrée, init IDT, test exceptions
-│   ├── idt.rs              ← IDT + 5 handlers d'exceptions ← NOUVEAU
-│   ├── vga1.rs             ← spinlock maison
-│   ├── vga2.rs             ← Writer VGA + couleurs
-│   ├── vga.rs              ← couche compat fonctions libres
-│   ├── serial.rs           ← port série COM1
-│   ├── test_runner.rs      ← infrastructure de test QEMU
-│   ├── boot.asm            ← boot sector 16 bits
-│   └── stage2.asm          ← transition 32→64 bits
-└── tests/
-    ├── Cargo.toml
-    └── src/
-        ├── main.rs
-        ├── vga1.rs
-        ├── vga2.rs
-        ├── vga.rs
-        ├── serial.rs
-        └── test_runner.rs
-```
-
----
+![Structure des fichiers et dossiers du projet](./file_structure.png)
 
 ## Résultat obtenu
 
-```
-Jour 7 - IDT & Exceptions CPU
-==============================
-IDT chargee.
+![Compilation réussie](./compile_success.png)
 
-Test 1 : declenchement division par zero...
+![Résultat final - Exceptions CPU interceptées](./final_result.png)
 
-[EXCEPTION] Division par zero !
-  RIP : 0x200050
-
-=== KERNEL PANIC ===
-Raison  : divide error
-Fichier : src/idt.rs
-Systeme arrete.
-```
-
-**`RIP : 0x200050`** → adresse exacte de l'instruction `DIV RBX` fautive dans le kernel. Plus de reboot — le CPU halt proprement après avoir loggé l'erreur.
+**`RIP : 0x200050`** - adresse exacte de l'instruction `DIV RBX` fautive dans le kernel. Plus de reboot - le CPU halt proprement après avoir loggé l'erreur.
 
 ---
 
@@ -194,4 +151,4 @@ Systeme arrete.
 
 Notre IDT intercepte tout ça **avant** que le système perde le contrôle.
 
-Le **Double Fault** mérite une attention particulière : si le handler de Double Fault lui-même plante (stack overflow par exemple), le CPU déclenche un **Triple Fault** et reboot sans aucune trace. Les OS modernes utilisent une **stack dédiée** (IST — Interrupt Stack Table) pour le Double Fault handler — c'est l'étape suivante naturelle.
+Le **Double Fault** mérite une attention particulière : si le handler de Double Fault lui-même plante (stack overflow par exemple), le CPU déclenche un **Triple Fault** et reboot sans aucune trace. Les OS modernes utilisent une **stack dédiée** (IST - Interrupt Stack Table) pour le Double Fault handler - c'est l'étape suivante.
