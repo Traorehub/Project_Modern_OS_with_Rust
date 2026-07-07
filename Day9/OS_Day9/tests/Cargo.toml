@@ -1,0 +1,18 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2024"
+publish = false
+autobins = false
+autolib = false
+
+[[bin]]
+name = "kernel_tests"
+path = "src/main.rs"
+harness = false
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

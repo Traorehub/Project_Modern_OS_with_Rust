@@ -1,0 +1,17 @@
+[build]
+target = "x86_64-unknown-none"
+
+[target.x86_64-unknown-none]
+rustflags = [
+    "-C", "link-arg=-T/home/kali/Day15/OS_Day15/linker.ld",
+    "-C", "linker=rust-lld",
+    "-C", "opt-level=z",
+    "-C", "panic=abort",
+    "-C", "code-model=kernel",
+    "-C", "relocation-model=static",
+    "-C", "link-arg=/home/kali/Day15/OS_Day15/trigger_df.o",
+    "-C", "link-arg=/home/kali/Day15/OS_Day15/reload_cs.o",
+]
+runner = "/home/kali/Day15/OS_Day15/run_tests.sh"
+
+[target.x86_64-unknown-none.build-override]
