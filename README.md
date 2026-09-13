@@ -33,6 +33,7 @@ graph LR
     F --> G[Jours 11-13<br/>Frames, Heap, Allocateur]
     G --> H[Jour 14<br/>Async & Clavier]
     H --> I[Jour 15<br/>Synthèse & Démo]
+    I --> J[Jour 16<br/>Timer PIT / IRQ0]
 ```
 
 | Jour | Thème | Arch. | Documentation |
@@ -53,6 +54,7 @@ graph LR
 | **13** | Linked list heap allocator | `x86_64` | [Resume](./Day13/Jour13_Heap_Allocator_Resume.md) · [Complet](./Day13/Jour13_Heap_Allocator_Complet.md) |
 | **14** | PIC + IRQ clavier + executeur async | `x86_64` | [Resume](./Day14/Jour14_Async_Clavier_Resume.md) · [Complet](./Day14/Jour14_Async_Clavier_Complet.md) |
 | **15** | Synthèse intégrée + démo | `x86_64` | [Resume](./Day15/Jour15_Synthese_Finale_Resume.md) · [GIF](./Day15/jour15_demo_finale.gif) · [code](./Day15/OS_Day15/) |
+| **16** | Timer PIT 8254 — IRQ0 à 100 Hz, noyau cadencé | `x86_64` | [Resume](./Day16/Jour16_Timer_IRQ0_Resume.md) · [Complet](./Day16/Jour16_Timer_IRQ0_Complet.md) · [code](./Day16/OS_Day16/) |
 
 ---
 
@@ -82,6 +84,7 @@ Quelques captures représentatives — chaque jour a davantage d'images dans son
 - **Alloc/free** de blocs variables (linked list allocator)
 - Recevoir les **frappes clavier** via IRQ1 + executeur cooperatif
 - **Valider l'intégration** (Jour 15) : test `0xC0FFEE`, bannière `TOUS LES SOUS-SYSTEMES : OK`
+- Se **cadencer tout seul** (Jour 16) : timer PIT à 100 Hz, uptime, base du préemptif
 
 ---
 
@@ -140,6 +143,7 @@ Par jour (à partir du Jour 8) : `JourN_*_Resume.md` · `JourN_*_Complet.md` · 
 | Bit NX (Jour 10) | W^X — pas d'exécution sur données |
 | Heap (Jour 13) | Overflow, double-free, UAF |
 | PIC remappé (Jour 14) | IRQ ne tombe pas sur vecteur d'exception |
+| Timer (Jour 16) | Canal auxiliaire temporel, DoS par flood d'IRQ, deadlock handler |
 
 ---
 
@@ -154,6 +158,10 @@ Par jour (à partir du Jour 8) : `JourN_*_Resume.md` · `JourN_*_Complet.md` · 
 ## Roadmap
 
 - [x] Jours 1 à 15 — code, rapports, [GIF démo](./Day15/jour15_demo_finale.gif)
+- [x] **Jour 16** — timer PIT 8254 / IRQ0
+- [ ] Jour 17 — bootloader LBA (lever le plafond de 59 secteurs), puis contexte CPU & `switch_context`
+- [ ] Jour 18 — scheduler préemptif (Round-Robin)
+- [ ] Jours 19-20 — syscalls & Ring 3
 - [ ] Consolidation en **livre**
 - [ ] Publication (GitHub Pages / PDF)
 
