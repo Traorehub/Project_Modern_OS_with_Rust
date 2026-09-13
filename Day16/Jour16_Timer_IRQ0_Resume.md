@@ -1,4 +1,4 @@
-# Jour 16 : Timer PIT 8254 (IRQ0)
+﻿# Jour 16 : Timer PIT 8254 (IRQ0)
 
 ---
 
@@ -125,11 +125,11 @@ Symptôme rencontré en vrai, pile au premier `{}` sur un entier :
 
 ### Arborescence
 
-![Arborescence du projet avec timer.rs](./rendu_arborescence.png)
+![Arborescence du projet avec timer.rs](./tree.png)
 
 ### Build et contrôle de taille
 
-![Build termine et verification de la taille embarquable](./rendu_build_et_taille.png)
+![Build termine et verification de la taille embarquable](./finished_pret.png)
 
 ```
 [4/4] Verification de la taille embarquable...
@@ -140,7 +140,7 @@ OK - marge restante : 17 secteurs
 
 ### Boot
 
-![Fenetre QEMU avec les cinq phases validees](./rendu_boot_qemu.png)
+![Fenetre QEMU avec les cinq phases validees](./rendu_avant_que_je_tappe_le_clavier.png)
 
 ```
 [4/5] Timer : PIT programme : diviseur 11931 -> 100 Hz (1 tick = 10 ms)

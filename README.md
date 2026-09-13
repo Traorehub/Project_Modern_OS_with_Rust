@@ -70,6 +70,7 @@ Quelques captures représentatives — chaque jour a davantage d'images dans son
 | **Pagination** | 9 | ![Tables de pages](./Day9/Rendu_sur_kali_day9.png) |
 | **Heap allocator** | 13 | ![Alloc / free / coalescence](./Day13/rendu.png) |
 | **Clavier interactif** | 14 | ![IRQ1 fonctionnel](./Day14/jour14_capture4_clavier_fonctionnel.png) |
+| **Noyau cadencé** | 16 | ![Timer IRQ0 et clavier IRQ1 en parallèle](./Day16/rendu_avec_hello_et_action_sur_clavier.png) |
 
 ---
 
