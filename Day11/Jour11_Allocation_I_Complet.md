@@ -90,7 +90,7 @@ Les tables de pages sont à `0x70000` - dans la frame 0 (0x000000-0x1fffff). En 
 
 ---
 
-## Implémentation — `src/frame_allocator.rs`
+## Implémentation : `src/frame_allocator.rs`
 
 ### Structure principale
 
@@ -105,7 +105,7 @@ pub struct FrameAllocator {
 }
 ```
 
-### Allocation — first-fit
+### Allocation : first-fit
 
 ```rust
 pub fn alloc(&mut self) -> Option<u64> {

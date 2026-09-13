@@ -64,7 +64,7 @@ Espace virtuel :
 
 ---
 
-## Implémentation — `src/heap.rs`
+## Implémentation : `src/heap.rs`
 
 ### Mapping
 
@@ -127,7 +127,7 @@ pub fn test_heap() {
 }
 ```
 
-### Test de validation — preuve que le mapping est réel
+### Test de validation : preuve que le mapping est réel
 
 ```rust
 // Accès à une adresse hors heap -> Page Fault -> prouve l'isolation

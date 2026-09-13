@@ -29,7 +29,7 @@ Entrée de table de pages 64 bits :
 
 ### Prérequis : EFER.NXE
 
-Avant d'utiliser le bit NX dans les entrées de tables, il faut l'activer dans le registre **EFER** (Extended Feature Enable Register) — bit 11 appelé **NXE** (No-Execute Enable).
+Avant d'utiliser le bit NX dans les entrées de tables, il faut l'activer dans le registre **EFER** (Extended Feature Enable Register), bit 11 appelé **NXE** (No-Execute Enable).
 
 ```rust
 // Lire EFER (MSR 0xC0000080)
@@ -40,11 +40,11 @@ let new_efer = efer | (1 << 11);
 core::arch::asm!("wrmsr", in("ecx") 0xC0000080u32, in("rax") new_efer, ...);
 ```
 
-Sans `EFER.NXE = 1`, le bit 63 est un **reserved bit** — l'écrire cause un GPF.
+Sans `EFER.NXE = 1`, le bit 63 est un **reserved bit**, l'écrire cause un GPF.
 
-### `invlpg` — invalider le TLB
+### `invlpg` : invalider le TLB
 
-Après avoir modifié une entrée de table de pages, le CPU peut encore utiliser l'ancienne entrée depuis son **TLB** (Translation Lookaside Buffer — cache des traductions d'adresses). Il faut invalider l'entrée :
+Après avoir modifié une entrée de table de pages, le CPU peut encore utiliser l'ancienne entrée depuis son **TLB** (Translation Lookaside Buffer, cache des traductions d'adresses). Il faut invalider l'entrée :
 
 ```rust
 core::arch::asm!(
@@ -77,7 +77,7 @@ On préserve l'exécutabilité **uniquement** de la page `0x200000` qui contient
 
 ---
 
-## Implémentation — `src/paging.rs`
+## Implémentation : `src/paging.rs`
 
 ### Activation de NX
 

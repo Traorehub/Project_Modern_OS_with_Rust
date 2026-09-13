@@ -1,4 +1,4 @@
-# Jour 15 — Synthèse finale : revue rétrospective du projet
+# Jour 15 : Synthèse finale, revue rétrospective du projet
 
 ---
 
@@ -8,7 +8,7 @@ Après 14 jours de construction incrémentale, le Jour 15 consolide tout dans **
 
 > Est-ce que tout ce qu'on a construit tient debout quand on l'exécute dans le même binaire, dans le bon ordre, sans crash ?
 
-La réponse est **oui** — et la preuve est la démonstration ci-dessous.
+La réponse est **oui**, et la preuve est la démonstration ci-dessous.
 
 ![Aperçu en boucle](./jour15_demo_finale.gif)  
 Vidéo complète : [jour15_demo_finale.mp4](./jour15_demo_finale.mp4)
@@ -20,7 +20,7 @@ Vidéo complète : [jour15_demo_finale.mp4](./jour15_demo_finale.mp4)
 | Aspect | Détail |
 |--------|--------|
 | Type | Synthèse / démo / revue rétrospective |
-| Nouveau code technique | Non — réutilisation intégrale des modules Jours 4–14 |
+| Nouveau code technique | Non, réutilisation intégrale des modules Jours 4-14 |
 | Nouveau comportement | Séquence de validation, couleurs structurées, test heap `0xC0FFEE`, bannière finale |
 | Livrable principal | Vidéo QEMU + rapport bilan |
 
@@ -62,11 +62,11 @@ Vidéo complète : [jour15_demo_finale.mp4](./jour15_demo_finale.mp4)
 
 ## Séquence d'exécution détaillée
 
-### Phase 0 — Bannière
+### Phase 0 : Bannière
 
 Le kernel efface l'écran VGA, affiche une bannière **jaune** et logue la même chose sur le port série. Double canal de sortie = diagnostic même si VGA corrompu.
 
-### Phase 1 — Sécurité CPU `[1/4]`
+### Phase 1 : Sécurité CPU `[1/4]`
 
 ```rust
 gdt::init();
@@ -77,7 +77,7 @@ Initialise la **Global Descriptor Table** (segments kernel), l'**Interrupt Descr
 
 **Validé si :** pas de GPF/Triple Fault à ce stade.
 
-### Phase 2 — Mémoire `[2/4]`
+### Phase 2 : Mémoire `[2/4]`
 
 ```rust
 frame_allocator::init();
@@ -87,9 +87,9 @@ heap_allocator::init();
 
 Enchaîne les trois allocateurs construits progressivement :
 
-1. **Frame allocator** (Jour 11) — inventaire des pages physiques 2 Mo
-2. **Heap mapping** (Jour 12) — insertion de 4 frames dans les tables de pages à `0x4000000`
-3. **Linked list allocator** (Jour 13) — gestion alloc/free/coalescence
+1. **Frame allocator** (Jour 11) : inventaire des pages physiques 2 Mo
+2. **Heap mapping** (Jour 12) : insertion de 4 frames dans les tables de pages à `0x4000000`
+3. **Linked list allocator** (Jour 13) : gestion alloc/free/coalescence
 
 Puis le **test mémoire réel** :
 
@@ -113,9 +113,9 @@ Pourquoi `write_volatile` / `read_volatile` ?
 
 Affichage : **OK** (vert) ou **ECHEC** (rouge).
 
-### Phase 3 — Écran `[3/4]`
+### Phase 3 : Écran `[3/4]`
 
-Pas de re-init — on prouve que le **VGA Writer** (Jours 4-5) fonctionne déjà. Démo visuelle :
+Pas de re-init : on prouve que le **VGA Writer** (Jours 4-5) fonctionne déjà. Démo visuelle :
 
 ```
 Demo couleurs : Rouge Vert Bleu Magenta
@@ -123,7 +123,7 @@ Demo couleurs : Rouge Vert Bleu Magenta
 
 Chaque mot est affiché dans sa couleur via `set_color(fg, bg)`.
 
-### Phase 4 — Clavier `[4/4]`
+### Phase 4 : Clavier `[4/4]`
 
 ```rust
 unsafe { pic::init(); }
@@ -137,7 +137,7 @@ let mut executor = executor::Executor::new();
 executor.run(); // boucle infinie poll + hlt
 ```
 
-### Phase finale — Bannière de succès
+### Phase finale : Bannière de succès
 
 ```
 ======================================
@@ -167,15 +167,15 @@ Enregistrement du 7 juillet 2026. Contenu attendu dans la vidéo :
 
 ---
 
-## Revue rétrospective — ce qu'on a construit
+## Revue rétrospective : ce qu'on a construit
 
-### Jours 1–3 : Fondations
+### Jours 1-3 : Fondations
 
 - Rust `no_std` / `no_main`, panic handler, boot sector ASM
 - Transition mode protégé puis Long Mode (Jour 6.5)
 - **Cyber :** surface d'attaque minimale, pas de libstd
 
-### Jours 4–5 : Sortie
+### Jours 4-5 : Sortie
 
 - Accès VGA `0xb8000`, puis encapsulation safe avec `Writer`, `Mutex`, `println!`
 - **Cyber :** bounds checking sur le buffer écran, pas d'écriture hors limites
@@ -185,23 +185,23 @@ Enregistrement du 7 juillet 2026. Contenu attendu dans la vidéo :
 - Tests automatisés QEMU + port série
 - **Cyber :** détection précoce des régressions logiques (pas seulement syntaxe)
 
-### Jours 7–8 : Robustesse CPU
+### Jours 7-8 : Robustesse CPU
 
 - IDT 64 bits, handlers GPF/Page Fault/Double Fault
-- IST — stack dédiée pour double fault
+- IST : stack dédiée pour double fault
 - **Cyber :** fin des triple faults silencieux, traçabilité des crashes
 
-### Jours 9–10 : Isolation mémoire
+### Jours 9-10 : Isolation mémoire
 
 - Lecture tables de pages, huge pages 2 Mo
-- Bit NX + `EFER.NXE` — pages données non exécutables
+- Bit NX + `EFER.NXE` : pages données non exécutables
 - **Cyber :** mitigation DEP, empêche shellcode sur heap/stack
 
-### Jours 11–13 : Allocation dynamique
+### Jours 11-13 : Allocation dynamique
 
 - Frame allocator, heap mapping, linked list allocator
 - Tests double-free, coalescence, UAF démontré volontairement
-- **Cyber :** mêmes vulnérabilités qu'un heap C — audit `unsafe` obligatoire
+- **Cyber :** mêmes vulnérabilités qu'un heap C, audit `unsafe` obligatoire
 
 ### Jour 14 : Interaction
 
@@ -228,7 +228,7 @@ Notre kernel repose sur des blocs `unsafe` là où Rust ne peut pas garantir l'i
 | `pic.rs` | Ports I/O PIC | IRQ fantômes, GPF |
 | `keyboard.rs` | Handler IRQ | Race conditions, perte scancodes |
 
-Rust **safe** protège le code appelant (ex. `main.rs` n'a pas besoin d'`unsafe` pour afficher), mais l'**audit du noyau** reste manuel — comme en C, avec l'avantage que les frontières safe/unsafe sont explicites.
+Rust **safe** protège le code appelant (ex. `main.rs` n'a pas besoin d'`unsafe` pour afficher), mais l'**audit du noyau** reste manuel, comme en C, avec l'avantage que les frontières safe/unsafe sont explicites.
 
 ---
 
@@ -245,7 +245,7 @@ Rust **safe** protège le code appelant (ex. `main.rs` n'a pas besoin d'`unsafe`
 | Réseau | Aucun | Stack TCP/IP, firewall |
 | Mise à jour | Aucun | Signature, rollback |
 
-Notre OS est un **laboratoire pédagogique** — pas un produit déployable. Sa valeur : comprendre chaque couche suffisamment pour **auditer** un vrai système (Linux, Windows, firmware).
+Notre OS est un **laboratoire pédagogique**, pas un produit déployable. Sa valeur : comprendre chaque couche suffisamment pour **auditer** un vrai système (Linux, Windows, firmware).
 
 ---
 
@@ -299,4 +299,4 @@ Day15/
 
 ## Conclusion
 
-Le Jour 15 clôt la première phase du projet : **15 jours, un kernel x86_64 en Rust qui boote, gère la mémoire, affiche en couleur et répond au clavier**. La vidéo en est la preuve tangible. La prochaine étape — le **livre** — reprendra cette progression jour par jour avec schémas, exercices cyber et ce bilan rétrospectif enrichi.
+Le Jour 15 clôt la première phase du projet : **15 jours, un kernel x86_64 en Rust qui boote, gère la mémoire, affiche en couleur et répond au clavier**. La vidéo en est la preuve tangible. La prochaine étape, le **livre**, reprendra cette progression jour par jour avec schémas, exercices cyber et ce bilan rétrospectif enrichi.

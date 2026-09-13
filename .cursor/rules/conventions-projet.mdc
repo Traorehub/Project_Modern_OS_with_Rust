@@ -1,0 +1,74 @@
+---
+description: Conventions de rédaction (pas de tirets cadratins) et interdiction des commandes git qui modifient l'historique
+alwaysApply: true
+---
+
+# Conventions du dépôt
+
+## 1. Aucun tiret cadratin
+
+Ne jamais écrire `—` (U+2014) ni `–` (U+2013), dans aucun fichier : rapports `.md`, `README.md`,
+commentaires de code, sorties de scripts. Remplacer par la ponctuation adaptée au contexte.
+
+| Usage du cadratin | Remplacer par | Exemple |
+|---|---|---|
+| Titre suivi d'un sous-titre | `:` | `# Jour 16 : Timer PIT 8254` |
+| Cellule de tableau `Label — valeur` | `:` | `` `timer.rs` \| **Nouveau** : PIT + compteur `` |
+| Apposition explicative | `,` | `une notion du temps, prérequis du préemptif` |
+| Deux propositions liées | `.` ou `;` | `Le noyau tenait largement. La leçon est de mesurer.` |
+| Aparté secondaire | parenthèses | `la marge (8,5 Ko) devient bloquante` |
+| Cellule vide dans un tableau | `n/a` | `\| **1** \| Environnement bare-metal \| n/a \|` |
+
+Le tiret court `-` reste normal pour les listes, les intervalles (`Jours 19-20`) et les mots
+composés. Les guillemets français `« »` et l'apostrophe typographique `'` restent autorisés.
+
+Après toute rédaction, vérifier :
+
+```powershell
+Select-String -Path *.md -Pattern ([char]0x2014)
+```
+
+## 2. Jamais de git qui écrit
+
+L'utilisateur gère lui-même l'historique et la publication. Ne jamais exécuter :
+
+```
+git add        git commit      git push
+git tag        git rebase      git reset
+gh pr create   gh pr merge
+```
+
+Les commandes de lecture sont autorisées : `git status`, `git diff`, `git log`, `git show`.
+
+Quand le travail est prêt, s'arrêter et résumer ce qui a changé. Ne pas proposer de commiter,
+ne pas rédiger de message de commit non demandé, ne pas contourner via un script ou un alias.
+
+## 3. Dossiers des journées : deux chiffres
+
+GitHub trie les noms comme du texte, pas comme des nombres. `Day11` apparaît donc avant `Day9`.
+
+Tout dossier de journée s'écrit `DayNN`, avec un zéro devant 1 à 9 :
+
+```
+Day01  Day02  ...  Day09  Day10  Day11  Day16  Day17
+Day06_switch     # Jour 6.5, entre Day06 et Day07
+```
+
+Ne jamais créer `Day7`. Le Jour 17 s'appelle `Day17` (déjà deux chiffres).
+Les sous-dossiers internes déjà en place (`OS_Day9`, `OS_DAY4`) restent tels quels. Seule la racine du dépôt est paddée, c'est elle que GitHub affiche.
+
+## 4. Image bootable pour les visiteurs
+
+Chaque journée livre un disque brut `os_dayNN.img` à la racine de `DayNN/` (à côté des rapports). Ce n'est **pas** un ISO : le MBR boote un disque, QEMU le lance avec `-drive format=raw`.
+
+`build.sh` fabrique `../os_dayNN.img`. Pour la ramener de Kali vers Windows (à adapter au numéro du jour) :
+
+```powershell
+scp root@192.168.126.129:/home/kali/Day17/os_day17.img C:\Users\MOH\Documents\Project_OS_Rust\Day17\
+```
+
+Le visiteur, sans compiler :
+
+```bash
+qemu-system-x86_64 -drive format=raw,file=os_day17.img -serial stdio
+```

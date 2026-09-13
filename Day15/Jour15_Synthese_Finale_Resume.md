@@ -1,4 +1,4 @@
-# Jour 15 — Synthèse finale : démonstration intégrée
+# Jour 15 : Synthèse finale, démonstration intégrée
 
 ---
 
@@ -76,7 +76,7 @@ Ce test valide en une passe : **frame allocator → mapping heap → linked list
 
 ![Aperçu en boucle](./jour15_demo_finale.gif)
 
-Vidéo complète : [jour15_demo_finale.mp4](./jour15_demo_finale.mp4) — enregistrement QEMU du 7 juillet 2026.
+Vidéo complète : [jour15_demo_finale.mp4](./jour15_demo_finale.mp4), enregistrement QEMU du 7 juillet 2026.
 
 La démo montre :
 1. Les 4 phases s'afficher une par une avec `OK`
@@ -119,7 +119,7 @@ Day15/OS_Day15/src/
 | Heap | Détection double-free basique | Guard pages, heap hardening |
 | PIC / Clavier | IRQ remappées, buffer fixe | Input validation, rate limiting |
 
-> Un OS de production ajouterait des milliers de lignes de durcissement. Ce projet prouve la **chaîne complète** — de l'amorçage à l'interaction utilisateur — avec une surface d'attaque documentée à chaque couche.
+> Un OS de production ajouterait des milliers de lignes de durcissement. Ce projet prouve la **chaîne complète**, de l'amorçage à l'interaction utilisateur, avec une surface d'attaque documentée à chaque couche.
 
 ---
 
@@ -128,4 +128,4 @@ Day15/OS_Day15/src/
 - Timer IRQ0 → multitâche **préemptif**
 - Processus / threads avec changement de contexte
 - Système de fichiers, réseau, userspace
-- Consolidation en **livre** (reprise rétrospective Jours 1–15)
+- Consolidation en **livre** (reprise rétrospective Jours 1-15)

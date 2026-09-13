@@ -1,4 +1,4 @@
-// src/vga1.rs – spinlock maison (copy from Day5)
+// src/vga1.rs – spinlock maison (copy from Day05)
 
 use core::sync::atomic::{AtomicBool, Ordering};
 use core::cell::UnsafeCell;
