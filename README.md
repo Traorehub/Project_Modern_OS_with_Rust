@@ -35,6 +35,7 @@ graph LR
     H --> I[Jour 15<br/>Synthèse & Démo]
     I --> J[Jour 16<br/>Timer PIT / IRQ0]
     J --> K[Jour 17<br/>LBA + contexte CPU]
+    K --> L[Jour 18<br/>Scheduler préemptif]
 ```
 
 | Jour | Thème | Arch. | Documentation |
@@ -57,6 +58,7 @@ graph LR
 | **15** | Synthèse intégrée + démo | `x86_64` | [Resume](./Day15/Jour15_Synthese_Finale_Resume.md) · [GIF](./Day15/jour15_demo_finale.gif) · [code](./Day15/OS_Day15/) |
 | **16** | Timer PIT 8254 : IRQ0 à 100 Hz, noyau cadencé | `x86_64` | [Resume](./Day16/Jour16_Timer_IRQ0_Resume.md) · [Complet](./Day16/Jour16_Timer_IRQ0_Complet.md) · [code](./Day16/OS_Day16/) |
 | **17** | Bootloader LBA + `switch_context` | `x86_64` | [Resume](./Day17/Jour17_LBA_Contexte_Resume.md) · [Complet](./Day17/Jour17_LBA_Contexte_Complet.md) · [code](./Day17/OS_Day17/) |
+| **18** | Scheduler préemptif Round-Robin | `x86_64` | [Resume](./Day18/Jour18_Scheduler_Preemptif_Resume.md) · [Complet](./Day18/Jour18_Scheduler_Preemptif_Complet.md) · [code](./Day18/OS_Day18/) |
 
 ---
 
@@ -73,6 +75,7 @@ Quelques captures représentatives. Chaque jour a davantage d'images dans son do
 | **Heap allocator** | 13 | ![Alloc / free / coalescence](./Day13/rendu.png) |
 | **Clavier interactif** | 14 | ![IRQ1 fonctionnel](./Day14/jour14_capture4_clavier_fonctionnel.png) |
 | **Noyau cadencé** | 16 | ![Timer IRQ0 et clavier IRQ1 en parallèle](./Day16/rendu_avec_hello_et_action_sur_clavier.png) |
+| **Scheduler préemptif** | 18 | ![A et B coupés par IRQ0, compteurs qui montent](./Day18/rendu_A_B_instant2.png) |
 
 ---
 
@@ -90,6 +93,7 @@ Quelques captures représentatives. Chaque jour a davantage d'images dans son do
 - Se **cadencer tout seul** (Jour 16) : timer PIT à 100 Hz, uptime, base du préemptif
 - **Charger un kernel de plusieurs centaines de Ko** (Jour 17) : LBA multi-blocs, plus de plafond 59 secteurs
 - **Sauvegarder et restaurer un contexte CPU** (Jour 17) : `switch_context`, deux piles, sequence ABA
+- **Préempter une tâche qui refuse de s'arrêter** (Jour 18) : `schedule()` depuis IRQ0, A et B sans `yield`
 
 ---
 
@@ -117,7 +121,7 @@ rustup target add x86_64-unknown-none i686-unknown-none
 **Sans compiler** (image du Jour 17, déjà dans le dépôt après génération) :
 
 ```bash
-qemu-system-x86_64 -drive format=raw,file=Day17/os_day17.img -serial stdio
+qemu-system-x86_64 -drive format=raw,file=Day18/os_day18.img -serial stdio
 ```
 
 C'est un disque MBR brut, pas un ISO. Pour l'écran VGA et le clavier, compiler puis `./run_demo.sh`.
@@ -125,8 +129,8 @@ C'est un disque MBR brut, pas un ISO. Pour l'écran VGA et le clavier, compiler 
 **Depuis les sources** (Kali / Linux) :
 
 ```bash
-cd Day17/OS_Day17   # version la plus récente
-./build.sh          # bootloader, kernel, et ../os_day17.img
+cd Day18/OS_Day18   # version la plus récente
+./build.sh          # bootloader, kernel, et ../os_day18.img
 cargo run           # sortie série, idéal en SSH
 ./run_demo.sh       # fenêtre QEMU graphique (VGA + clavier PS/2)
 
@@ -141,7 +145,7 @@ cd Day06/OS_Day6 && ./run_tests.sh
 
 ```
 Project_OS_Rust/
-├── Day01/ … Day17/     # Code, rapports, captures
+├── Day01/ … Day18/     # Code, rapports, captures
 ├── Day06_switch/       # Jour 6.5 : passage 64 bits
 └── README.md
 ```
@@ -162,6 +166,7 @@ Par jour (à partir du Jour 8) : `JourN_*_Resume.md` · `JourN_*_Complet.md` · 
 | PIC remappé (Jour 14) | IRQ ne tombe pas sur vecteur d'exception |
 | Timer (Jour 16) | Canal auxiliaire temporel, DoS par flood d'IRQ, deadlock handler |
 | Boot LBA (Jour 17) | Premier maillon de confiance : taille réelle, plus de copie à l'aveugle |
+| Préemption (Jour 18) | Quota CPU, DoS par quantum trop court, deadlock si le handler prend un verrou |
 
 ---
 
@@ -178,7 +183,7 @@ Par jour (à partir du Jour 8) : `JourN_*_Resume.md` · `JourN_*_Complet.md` · 
 - [x] Jours 1 à 15 : code, rapports, [GIF démo](./Day15/jour15_demo_finale.gif)
 - [x] **Jour 16** : timer PIT 8254 / IRQ0
 - [x] **Jour 17** : bootloader LBA + `switch_context`
-- [ ] Jour 18 : scheduler préemptif (Round-Robin)
+- [x] **Jour 18** : scheduler préemptif (Round-Robin)
 - [ ] Jours 19-20 : syscalls & Ring 3
 - [ ] Consolidation en **livre**
 - [ ] Publication (GitHub Pages / PDF)
