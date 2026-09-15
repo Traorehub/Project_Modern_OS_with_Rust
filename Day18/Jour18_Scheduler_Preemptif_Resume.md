@@ -75,32 +75,38 @@ qemu-system-x86_64 -drive format=raw,file=os_day18.img -serial stdio
 
 ## Validation
 
-Mesure réelle sur Kali (`cargo run`). Quantum 10 ticks = 100 ms. Environ **10 switches/s**.
+### Build
 
-### Instant 1 : juste après les 2 s de test
+![Build : 22776 octets = 45 secteurs, plafond 768](./sortie_du_build_sh.png)
 
-![QEMU : A et B deja tous les deux au-dessus de 3 millions, 21 switches](./rendu_A_B_instant1.png)
+```
+Image kernel : 22776 octets = 45 secteurs (max 768)
+OK : MBR patche, 45 secteurs LBA a charger (plafond 768).
+     Image visiteurs : ../os_day18.img
+```
+
+22 536 octets au Jour 17, 22 776 aujourd'hui : le scheduler et FXSAVE tiennent. Toujours 45 secteurs sur 768.
+
+### Instant 1 : 10 s, A et B deja colles
+
+![Uptime 10 s : A=14517171 B=14179511 sw=99](./imagea10secondeaveclesvaleurdeAetBquetuconnais.png)
 
 ```
 [6/6] Scheduler : A et B bouclent sans yield...
-  taches A et B armees (boucle infinie, aucun switch)
-  attente 2 s : IRQ0 doit les couper de force...
   OK - A=3114722 B=3109425 switches=21 (aucun yield volontaire)
 
-[uptime] 2 s - 211 ticks - A=3114722 B=3109425 sw=21 - 0 touches
+[uptime] 10 s - 1000 ticks - A=14517171 B=14179511 sw=99 - 0 touches
 ```
 
-A et B sont au même ordre de grandeur (3,11 M / 3,10 M). Aucun des deux n'a monopolisé le CPU.
+### Instant 2 : 22 s, A et B ont continue de monter
 
-### Instant 2 : 30 s plus tard, toujours sans yield
-
-![QEMU : A et B ont continue de monter, 300 switches](./rendu_A_B_instant2.png)
+![Uptime 22 s : A=29160002 B=28801581 sw=219](./imagea22secondeaveclesvaleurdeAetBquetuconnais.png)
 
 ```
-[uptime] 30 s - 3001 ticks - A=39259465 B=38590626 sw=300 - 0 touches
+[uptime] 22 s - 2200 ticks - A=29160002 B=28801581 sw=219 - 0 touches
 ```
 
-A passe de 3,1 M à 39,3 M, B de 3,1 M à 38,6 M. `sw` suit le quantum (21 à 2 s, 300 à 30 s). Les deux boucles `loop { compteur += 1 }` n'appellent jamais `switch` : seul IRQ0 les coupe.
+Quantum 10 ticks = 100 ms, environ **10 switches/s** (99 à 10 s, 219 à 22 s). A et B restent dans le même ordre de grandeur. Aucun yield volontaire.
 
 ---
 

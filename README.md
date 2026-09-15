@@ -75,7 +75,7 @@ Quelques captures représentatives. Chaque jour a davantage d'images dans son do
 | **Heap allocator** | 13 | ![Alloc / free / coalescence](./Day13/rendu.png) |
 | **Clavier interactif** | 14 | ![IRQ1 fonctionnel](./Day14/jour14_capture4_clavier_fonctionnel.png) |
 | **Noyau cadencé** | 16 | ![Timer IRQ0 et clavier IRQ1 en parallèle](./Day16/rendu_avec_hello_et_action_sur_clavier.png) |
-| **Scheduler préemptif** | 18 | ![A et B coupés par IRQ0, compteurs qui montent](./Day18/rendu_A_B_instant2.png) |
+| **Scheduler préemptif** | 18 | ![A et B coupés par IRQ0, compteurs qui montent](./Day18/imagea22secondeaveclesvaleurdeAetBquetuconnais.png) |
 
 ---
 

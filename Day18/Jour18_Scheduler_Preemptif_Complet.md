@@ -48,36 +48,56 @@ Une zone FX toute à zéro n'est pas toujours restaurable. À la création d'une
 
 ## La preuve
 
-A et B n'appellent jamais `switch`. Si après 2 secondes les deux compteurs ont avancé, seul IRQ0 a pu leur donner le CPU. Mesure réelle sur Kali (`cargo run`).
+A et B n'appellent jamais `switch`. Si après 2 secondes les deux compteurs ont avancé, seul IRQ0 a pu leur donner le CPU.
 
-### Instant 1 : fin du test `[6/6]` (2 s)
+### Compilation
 
-![Compteurs A et B apres 2 s de preemption forcee](./rendu_A_B_instant1.png)
+![Build termine : 45 secteurs sur un plafond de 768](./sortie_du_build_sh.png)
+
+```
+[4/5] Taille reelle et patch du MBR...
+      Image kernel : 22776 octets = 45 secteurs (max 768)
+[5/5] Image disque bootable (raw MBR, pas un ISO)...
+
+OK : MBR patche, 45 secteurs LBA a charger (plafond 768).
+     Image visiteurs : ../os_day18.img
+```
+
+22 536 octets au Jour 17, 22 776 aujourd'hui (+240). Le scheduler Round-Robin et les 512 octets FX par tâche tiennent. Le plafond LBA (768) n'est pas en jeu.
+
+Les 34 warnings (`print_hex` inutilisé, `MutexGuard<'_, T>`, etc.) sont hérités. Ils n'empêchent pas le `Finished`.
+
+### Instant 1 : 10 s
+
+![Uptime 10 s, A et B colles, sw=99](./imagea10secondeaveclesvaleurdeAetBquetuconnais.png)
 
 ```
 [6/6] Scheduler : A et B bouclent sans yield...
   taches A et B armees (boucle infinie, aucun switch)
   attente 2 s : IRQ0 doit les couper de force...
   OK - A=3114722 B=3109425 switches=21 (aucun yield volontaire)
+
+[uptime] 10 s - 1000 ticks - A=14517171 B=14179511 sw=99 - 0 touches
 ```
 
-21 switches en 2 s : le quantum de 10 ticks (100 ms à 100 Hz) donne bien ~10 rotations par seconde. A et B sont collés (3 114 722 vs 3 109 425). Le Round-Robin n'a pas favorisé l'un des deux.
+21 switches en 2 s, 99 en 10 s : le quantum de 10 ticks (100 ms à 100 Hz) donne ~10 rotations par seconde. A et B sont collés. Le Round-Robin n'a pas favorisé l'un des deux.
 
-### Instant 2 : l'exécuteur tourne, A et B continuent
+### Instant 2 : 22 s
 
-![Uptime 30 s : A et B ont encore monte, sw=300](./rendu_A_B_instant2.png)
+![Uptime 22 s : A et B ont encore monte, sw=219](./imagea22secondeaveclesvaleurdeAetBquetuconnais.png)
 
 ```
-[uptime]  2 s -  211 ticks - A= 3114722 B= 3109425 sw= 21 - 0 touches
-[uptime] 30 s - 3001 ticks - A=39259465 B=38590626 sw=300 - 0 touches
+[uptime] 10 s - 1000 ticks - A=14517171 B=14179511 sw= 99 - 0 touches
+[uptime] 22 s - 2200 ticks - A=29160002 B=28801581 sw=219 - 0 touches
 ```
 
 | Instant | A | B | switches | ticks |
 |---|---|---|---|---|
-| 2 s | 3 114 722 | 3 109 425 | 21 | 211 |
-| 30 s | 39 259 465 | 38 590 626 | 300 | 3001 |
+| 2 s (`[6/6] OK`) | 3 114 722 | 3 109 425 | 21 | 211 |
+| 10 s (capture 1) | 14 517 171 | 14 179 511 | 99 | 1000 |
+| 22 s (capture 2) | 29 160 002 | 28 801 581 | 219 | 2200 |
 
-A ×12,6, B ×12,4, `sw` ×14,3. Les deux restent dans le même ordre de grandeur. Personne n'a gelé, personne n'a tout pris. L'exécuteur affiche l'uptime et accepte le clavier pendant que IRQ0 continue de couper A et B.
+De 10 s à 22 s : A ×2,01, B ×2,03, `sw` +120 (toujours ~10/s). Personne n'a gelé, personne n'a tout pris. L'exécuteur affiche l'uptime pendant que IRQ0 continue de couper A et B.
 
 ---
 
@@ -128,9 +148,10 @@ qemu-system-x86_64 -drive format=raw,file=os_day18.img -serial stdio
 Day18/
 ├── Jour18_Scheduler_Preemptif_Resume.md
 ├── Jour18_Scheduler_Preemptif_Complet.md
-├── rendu_A_B_instant1.png       <- [6/6] OK, A et B a 2 s
-├── rendu_A_B_instant2.png       <- uptime 30 s, A et B ont monte
-├── os_day18.img                 <- apres ./build.sh + scp
+├── sortie_du_build_sh.png
+├── imagea10secondeaveclesvaleurdeAetBquetuconnais.png
+├── imagea22secondeaveclesvaleurdeAetBquetuconnais.png
+├── os_day18.img                 <- disque bootable pour QEMU
 └── OS_Day18/
     └── src/
         ├── scheduler.rs         <- NOUVEAU
