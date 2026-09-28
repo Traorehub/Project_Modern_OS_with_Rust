@@ -1,9 +1,14 @@
-# Writing an OS in Rust : Perspective Cybersécurité
+# Writing an OS in Rust, noyau x86_64 bare-metal
 
-Développement pas à pas d'un noyau **x86_64** en Rust (`no_std`), de l'environnement bare-metal jusqu'aux interruptions matérielles, la pagination, l'allocation dynamique et le multitâche coopératif. Chaque journée est documentée avec rapports techniques, captures QEMU et angle **offensif/défensif**.
+![Kernel Rust](https://img.shields.io/badge/Kernel-Rust-DEA584?style=for-the-badge&logo=rust&logoColor=black)
+![Arch x86_64](https://img.shields.io/badge/Arch-x86__64-0078D4?style=for-the-badge)
+![no_std](https://img.shields.io/badge/no__std-bare--metal-111827?style=for-the-badge)
+![QEMU](https://img.shields.io/badge/Emulateur-QEMU-FF6600?style=for-the-badge)
+![PIT 8254](https://img.shields.io/badge/Timer-PIT%208254-E11D48?style=for-the-badge)
+![Scheduler](https://img.shields.io/badge/Scheduler-preemptif-7C3AED?style=for-the-badge)
+![Cyber](https://img.shields.io/badge/Projet-Cybersecurite-DB2777?style=for-the-badge)
 
-> **16 jours** · kernel fonctionnel · clavier + écran + mémoire + sécurité CPU  
-> Projet éducatif, consolidation en **livre** en cours.
+Noyau **x86_64** en Rust (`no_std`), construit jour par jour : boot, VGA, interruptions, pagination, heap, clavier, timer, puis ordonnanceur préemptif. Chaque journée a son code, ses rapports et son angle offensif/défensif.
 
 ---
 
