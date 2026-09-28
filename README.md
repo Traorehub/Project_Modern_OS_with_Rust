@@ -1,12 +1,14 @@
 # Writing an OS in Rust, noyau x86_64 bare-metal
 
-![Kernel Rust](https://img.shields.io/badge/Kernel-Rust-DEA584?style=for-the-badge&logo=rust&logoColor=black)
-![Arch x86_64](https://img.shields.io/badge/Arch-x86__64-0078D4?style=for-the-badge)
-![no_std](https://img.shields.io/badge/no__std-bare--metal-111827?style=for-the-badge)
-![QEMU](https://img.shields.io/badge/Emulateur-QEMU-FF6600?style=for-the-badge)
-![PIT 8254](https://img.shields.io/badge/Timer-PIT%208254-E11D48?style=for-the-badge)
-![Scheduler](https://img.shields.io/badge/Scheduler-preemptif-7C3AED?style=for-the-badge)
-![Cyber](https://img.shields.io/badge/Projet-Cybersecurite-DB2777?style=for-the-badge)
+<p>
+<img alt="Kernel Rust" src="https://img.shields.io/badge/Kernel-Rust-orange?logo=rust&logoColor=white" />
+<img alt="Arch x86_64" src="https://img.shields.io/badge/Arch-x86__64-blue" />
+<img alt="Mode no_std" src="https://img.shields.io/badge/Mode-no__std-lightgrey" />
+<img alt="Emulateur QEMU" src="https://img.shields.io/badge/Emulateur-QEMU-orange" />
+<img alt="Timer PIT 8254" src="https://img.shields.io/badge/Timer-PIT%208254-red" />
+<img alt="Scheduler preemptif" src="https://img.shields.io/badge/Scheduler-preemptif-purple" />
+<img alt="Projet Cybersecurite" src="https://img.shields.io/badge/Projet-Cybersecurite-ff69b4" />
+</p>
 
 Noyau **x86_64** en Rust (`no_std`), construit jour par jour : boot, VGA, interruptions, pagination, heap, clavier, timer, puis ordonnanceur préemptif. Chaque journée a son code, ses rapports et son angle offensif/défensif.
 
