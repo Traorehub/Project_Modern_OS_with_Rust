@@ -36,7 +36,7 @@ Le **jour 17** a deux visages. D'un côté le bootloader passe en **LBA** (INT 1
 
 Le **jour 18** relie ces briques. L'ordonnanceur Round-Robin a trois slots (MAIN, A, B). A et B incrémentent un compteur dans une boucle infinie, **sans jamais appeler `switch`**. Toutes les 10 ticks (100 ms), le handler IRQ0 envoie l'EOI puis appelle `schedule()`. Si l'EOI est après le switch, le PIC croit qu'IRQ0 est encore en cours et le préemptif tue le timer. Le contexte sauve aussi l'état SSE (`fxsave64` / `fxrstor64`), parce qu'une préemption au milieu d'un `movaps` corromprait l'autre tâche. La preuve n'est pas un schéma : après 2 secondes A et B sont tous les deux au-dessus de 3 millions d'incréments, vers 10 switches par seconde, et 20 secondes plus tard les deux compteurs ont encore doublé. Personne n'a rendu la main. IRQ0 les a coupés.
 
-Le noyau du Jour 18 sait donc booter en 64 bits, afficher, logger, attraper les exceptions, paginer avec NX, allouer, lire un clavier, se cadencer, charger plus que 59 secteurs, et préempter des tâches noyau. **Ce n'est pas un système d'exploitation complet.** Il n'y a pas de Ring 3, pas d'appels système, pas de processus utilisateur isolés, pas de système de fichiers, pas de réseau. A pourrait encore écraser la pile de B. Un quantum trop court transformerait le scheduler en DoS contre lui-même. Les jours 19 et 20 visent les syscalls et l'espace utilisateur. Une consolidation en livre est prévue à partir de ces rapports.
+Le noyau du Jour 18 sait donc booter en 64 bits, afficher, logger, attraper les exceptions, paginer avec NX, allouer, lire un clavier, se cadencer, charger plus que 59 secteurs, et préempter des tâches noyau. **Ce n'est pas un système d'exploitation complet.** Il n'y a pas de Ring 3, pas d'appels système, pas de processus utilisateur isolés, pas de système de fichiers, pas de réseau. A pourrait encore écraser la pile de B. Un quantum trop court transformerait le scheduler en DoS contre lui-même. Les jours 19 et 20 visent les syscalls et l'espace utilisateur.
 
 Chaque dossier `DayNN/` (zéro devant 1 à 9, pour que GitHub trie dans l'ordre) contient le code de la journée, un Resume, un Complet à partir du Jour 8, des captures, et souvent `os_dayNN.img` : un disque raw MBR, pas un ISO, lançable avec QEMU sans compiler. Le visiteur peut donc relire le raisonnement, relancer le binaire, et vérifier que le compteur A n'est pas une capture figée.
 
@@ -220,8 +220,6 @@ Par jour (à partir du Jour 8) : `JourN_*_Resume.md` · `JourN_*_Complet.md` · 
 - [x] **Jour 17** : bootloader LBA + `switch_context`
 - [x] **Jour 18** : scheduler préemptif (Round-Robin)
 - [ ] Jours 19-20 : syscalls & Ring 3
-- [ ] Consolidation en **livre**
-- [ ] Publication (GitHub Pages / PDF)
 
 ---
 
